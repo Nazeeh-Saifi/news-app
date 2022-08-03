@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ArticleController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -20,4 +21,8 @@ Route::get('/', function () {
 
 Auth::routes(['reset' => false, 'confirm' => false]);
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+// Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+Route::group(['prefix' => 'articles', 'as' => 'articles.', 'middleware' => 'auth'], function () {
+    Route::get('/', [ArticleController::class, 'index'])->name('index');
+});
