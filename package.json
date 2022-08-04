@@ -19,5 +19,11 @@
         "resolve-url-loader": "^5.0.0",
         "sass": "^1.32.11",
         "sass-loader": "^11.0.1"
+    },
+    "dependencies": {
+        "@editorjs/editorjs": "^2.25.0",
+        "@editorjs/header": "^2.6.2",
+        "@editorjs/list": "^1.7.0",
+        "jquery": "^3.6.0"
     }
 }
