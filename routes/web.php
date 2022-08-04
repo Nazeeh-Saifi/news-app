@@ -25,4 +25,6 @@ Auth::routes(['reset' => false, 'confirm' => false]);
 
 Route::group(['prefix' => 'articles', 'as' => 'articles.', 'middleware' => 'auth'], function () {
     Route::get('/', [ArticleController::class, 'index'])->name('index');
+    Route::get('/create', [ArticleController::class, 'create'])->name('create');
+    Route::post('/', [ArticleController::class, 'store'])->name('store');
 });

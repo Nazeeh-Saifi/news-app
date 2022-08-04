@@ -21,6 +21,12 @@
     
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+            
+    <style>
+        p.card-text {
+            margin-block: 0;
+        }
+    </style>
 </head>
 <body>
     <div id="app">
@@ -85,5 +91,6 @@
             @yield('content')
         </main>
     </div>
+    @stack('scripts')
 </body>
 </html>

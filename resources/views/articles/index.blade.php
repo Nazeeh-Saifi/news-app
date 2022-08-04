@@ -8,25 +8,40 @@
         <div class="card-header d-flex justify-content-between align-items-center">
           <div>{{ __('My Articles') }}</div>
           <div>
-            <a href="#" class="btn btn-primary ml-auto" role="button">add</a>
+            <a href="{{ route('articles.create') }}" class="btn btn-primary ml-auto" role="button">create</a>
           </div>
         </div>
 
         <div class="card-body">
+          {{-- alert success --}}
+          @if(session('success'))
+          <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-check2" viewBox="0 0 16 16">
+              <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/>
+            </svg>
+            {{__('Article created successfully!!')}}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          @endif
+          {{-- articles cards --}}
           <div class="row g-2">
-            @for($i=1; $i<=9 ; $i++) 
+            @foreach ($articles as $article)
             <div class="col-sm-4">
               <div class="card" style="width: auto;">
-                <img src="..." class="card-img-top" alt="...">
+                <img src="https://via.placeholder.com/200" class="card-img-top" alt="...">
                 <div class="card-body">
-                  <h5 class="card-title">Card title</h5>
-                  <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                  <a href="#" class="btn btn-primary">Go somewhere</a>
+                  <h5 class="card-title">{{$article->title}}</h5>
+                  <p class="card-text"><small class="text-muted">Created: {{$article->created_at->diffForHumans() }}</small></p>
+                  <p class="card-text"><small class="text-muted">Last updated {{$article->updated_at->diffForHumans() }}</small></p>
+
                 </div>
               </div>
+            </div>
+            @endforeach
           </div>
-          @endfor
-        </div>
+      </div>
+      <div class="card-footer">
+        {{ $articles }}
       </div>
     </div>
   </div>

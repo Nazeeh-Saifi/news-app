@@ -17,6 +17,7 @@ class CreateArticlesTable extends Migration
             $table->id();
             $table->string('title');
             $table->json('content');
+            $table->foreignId('user_id')->constrained();
             $table->timestamps();
         });
     }

@@ -16,7 +16,8 @@ class ArticleController extends Controller
     public function index()
     {
         //
-        return view('articles.index');
+        $articles = Article::latest()->paginate(6);
+        return view('articles.index', ['articles' => $articles]);
     }
 
     /**
@@ -27,6 +28,7 @@ class ArticleController extends Controller
     public function create()
     {
         //
+        return view('articles.create');
     }
 
     /**
@@ -38,6 +40,10 @@ class ArticleController extends Controller
     public function store(StoreArticleRequest $request)
     {
         //
+        $validated = $request->validated();
+        Article::create($validated);
+        // dd($request->validated());
+        return redirect()->to(route('articles.index'))->with('success', 'Article added successfully!!');
     }
 
     /**

@@ -13,7 +13,7 @@ class StoreArticleRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -25,6 +25,21 @@ class StoreArticleRequest extends FormRequest
     {
         return [
             //
+            'content' => 'required|json',
+            'title' => 'required|string',
+            'user_id' => 'required|integer'
         ];
+    }
+
+    /**
+     * Prepare the data for validation.
+     *
+     * @return void
+     */
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'user_id' => auth()->user()->id,
+        ]);
     }
 }
