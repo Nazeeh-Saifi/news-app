@@ -18,17 +18,28 @@ export class GifImage {
         this.q = "";
         this.provider = process.env.MIX_GIF_PROVIDER;
         this.apiKey =
-            this.provider === "giphy" ? process.env.MIX_GIPHY_API_KEY : "";
+            this.provider === "giphy"
+                ? process.env.MIX_GIPHY_API_KEY
+                : process.env.MIX_TENOR_API_KEY;
         this.gifApiEndpoint =
-            this.provider === "giphy" ? "https://api.giphy.com/v1/gifs" : "";
+            this.provider === "giphy"
+                ? "https://api.giphy.com/v1/gifs"
+                : "https://tenor.googleapis.com/v2";
         this.trendingEndpoint =
             this.provider === "giphy"
                 ? `${this.gifApiEndpoint}/trending?api_key=${this.apiKey}&limit=${this.limit}&rating=${this.rating}`
-                : "";
+                : `${this.gifApiEndpoint}/featured?key=${this.apiKey}&limit=${this.limit}`;
         this.searchEndpoint =
             this.provider === "giphy"
                 ? `${this.gifApiEndpoint}/search?api_key=${this.apiKey}&q=${this.q}&offset=${this.offset}&limit=${this.limit}&rating=${this.rating}`
-                : "";
+                : `${this.gifApiEndpoint}/search?key=${this.apiKey}&q=${this.q}&limit=${this.limit}`;
+
+        console.log({
+            provider: this.provider,
+            key: this.apiKey,
+            trending: this.trendingEndpoint,
+            searchEndpoint: this.searchEndpoint,
+        });
     }
 
     render() {
@@ -76,6 +87,7 @@ export class GifImage {
                 this.q = event.target.value;
                 this._updateSearchEndpoint();
 
+                console.log(this.q);
                 // render trending when no q value
                 this.q
                     ? this._fetchAndCreateImages(this._getSearchData.bind(this))
@@ -93,15 +105,22 @@ export class GifImage {
         this.searchEndpoint =
             this.provider === "giphy"
                 ? `${this.gifApiEndpoint}/search?api_key=${this.apiKey}&q=${this.q}&offset=${this.offset}&limit=${this.limit}&rating=${this.rating}`
-                : "";
+                : `${this.gifApiEndpoint}/search?key=${this.apiKey}&q=${this.q}&limit=${this.limit}`;
     }
 
     // use one of the fetch functions (tranding or search) and create thier
     _fetchAndCreateImages(fetchFunction) {
         fetchFunction()
             .then((data) => {
-                const urls = data.data.reduce((acc, obj) => {
-                    acc.push(obj.images.fixed_height_downsampled.url);
+                console.log(data);
+                let providerData =
+                    this.provider === "giphy" ? data.data : data.results;
+                const urls = providerData.reduce((acc, obj) => {
+                    let url =
+                        this.provider === "giphy"
+                            ? obj.images.fixed_height_downsampled.url
+                            : obj.media_formats.nanogif.url;
+                    acc.push(url);
                     return acc;
                 }, []);
                 this._createImages(urls);
