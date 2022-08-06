@@ -35,9 +35,13 @@ window.axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";
 import EditorJS from "@editorjs/editorjs";
 import Header from "@editorjs/header";
 import List from "@editorjs/list";
+import { GifImage } from "./gif-image";
 
 window.editor = {
     EditorJS,
     Header,
     List,
+    GifImage,
 };
+
+console.log({ gif: process.env.MIX_GIF_PROVIDER });

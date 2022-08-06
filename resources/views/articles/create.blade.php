@@ -54,7 +54,8 @@ window.addEventListener('load', function() {
   const {
     EditorJS,
     Header,
-    List
+    List,
+    GifImage
   } = window.editor;
 
   try {
@@ -76,8 +77,14 @@ window.addEventListener('load', function() {
      * Pass Tool's class or Settings object for each Tool you want to use
      */
     tools: {
-      header: Header,
+      header: {
+        class: Header,
+        inlineToolbar: true
+      },
       list: List,
+      image: {
+        class: GifImage,
+      }
     },
 
     data: oldData?.blocks.length > 0 ? oldData : {}
