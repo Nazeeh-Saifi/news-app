@@ -55,7 +55,8 @@ export class GifImage {
         // add input element for searching with classes for styling
         const input = document.createElement("input");
         input.classList.add("form-control", "w-50", "my-3");
-        input.placeholder = "Search via giphy";
+        input.placeholder =
+            this.provider === "giphy" ? "Search via giphy" : "Search via tenor";
 
         // add div element for the loading spinner when request is fetching
         this.loadingSpinner = document.createElement("div");
@@ -119,7 +120,7 @@ export class GifImage {
                     let url =
                         this.provider === "giphy"
                             ? obj.images.fixed_height_downsampled.url
-                            : obj.media_formats.nanogif.url;
+                            : obj.media_formats.tinygif.url;
                     acc.push(url);
                     return acc;
                 }, []);
