@@ -24,8 +24,8 @@
             
     <style>
         p.card-text {
-            margin-block: 0;
-        }
+                margin: 0;
+            }
     </style>
 </head>
 <body>

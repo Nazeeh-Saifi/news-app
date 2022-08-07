@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Str;
 
 class StoreArticleRequest extends FormRequest
 {
@@ -27,7 +28,8 @@ class StoreArticleRequest extends FormRequest
             //
             'content' => 'required|json',
             'title' => 'required|string',
-            'user_id' => 'required|integer'
+            'user_id' => 'required|integer',
+            'slug' => 'required|string'
         ];
     }
 
@@ -40,6 +42,7 @@ class StoreArticleRequest extends FormRequest
     {
         $this->merge([
             'user_id' => auth()->user()->id,
+            'slug' => Str::slug($this->title) . '-' . Str::random()
         ]);
     }
 }

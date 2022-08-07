@@ -3,7 +3,7 @@
 @section('content')
 <div class="container">
   <div class="row justify-content-center">
-    <div class="col-md-8">
+    <div class="col-md-12">
       <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
           <div>{{ __('My Articles') }}</div>
@@ -28,9 +28,10 @@
             @foreach ($articles as $article)
             <div class="col-sm-4">
               <div id="articles-cards" class="card" style="width: auto;">
-                <img src="https://via.placeholder.com/150" class="card-img-top" alt="...">
+                {{-- <img src="https://via.placeholder.com/150" class="card-img-top" alt="..."> --}}
                 <div class="card-body">
                   <h5 class="card-title"><a href="{{route('articles.show', ['article' => $article->id])}}">{{$article->title}} </a></h5>
+                  <p class="card-text"><small class="text-muted">by: {{$article->user->name }}</small></p>
                   <p class="card-text"><small class="text-muted">Created: {{$article->created_at->diffForHumans() }}</small></p>
                   <p class="card-text"><small class="text-muted">Last updated {{$article->updated_at->diffForHumans() }}</small></p>
 

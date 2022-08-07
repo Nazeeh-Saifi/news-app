@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ArticleController;
+use App\Models\Article;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -16,14 +17,21 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
-});
+    $articles = Article::with('user')->latest()->paginate(9);
+    return view('welcome', ['articles' => $articles]);
+})->name('welcome');
+
+Route::get('/articles/{slug}', function ($slug) {
+    $article = Article::where('slug', $slug)->first();
+    // dd($slug, request(), $article);
+    return view('article-slug', ['article' => $article]);
+})->name('articles.slug');
 
 Auth::routes(['reset' => false, 'confirm' => false]);
 
 // Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-Route::group(['prefix' => 'articles', 'as' => 'articles.', 'middleware' => 'auth'], function () {
+Route::group(['prefix' => 'admin/articles', 'as' => 'articles.', 'middleware' => 'auth'], function () {
     Route::get('/', [ArticleController::class, 'index'])->name('index');
     Route::get('/create', [ArticleController::class, 'create'])->name('create');
     Route::post('/', [ArticleController::class, 'store'])->name('store');

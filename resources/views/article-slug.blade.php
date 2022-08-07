@@ -25,10 +25,6 @@
             body {
                 font-family: 'Nunito', sans-serif;
             }
-
-            p.card-text {
-                margin: 0;
-            }
         </style>
     </head>
     <body class="antialiased">
@@ -81,44 +77,19 @@
                     </div>
                 </div> --}}
                 <div class="container mt-8">
-                        <div class="row justify-content-center">
+                    <div class="row justify-content-center">
                         <div class="col-md-12">
-                            <div class="card">
+                        <div class="card">
                             <div class="card-header d-flex justify-content-between align-items-center">
-                                <div>{{ __('Latest Articles') }}</div>
+                            <div>{{ $article->title }}</div>
+                    
+                            <div>
+                                <a href="{{ route('welcome') }}" class="btn btn-secondary ml-auto" role="button">back</a>
+                            </div>
                             </div>
                     
                             <div class="card-body">
-                                @if(count($articles) == 0 )
-                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-check2" viewBox="0 0 16 16">
-                                    <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/>
-                                    </svg>
-                                    {{__('Please register then create an article!!')}}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                </div>
-                                @else
-                                {{-- articles cards --}}
-                                <div class="row g-2">
-                                @foreach ($articles as $article)
-                                <div class="col-sm-4">
-                                    <div id="articles-cards" class="card" style="width: auto;">
-                                    {{-- <img src="https://via.placeholder.com/150" class="card-img-top" alt="..."> --}}
-                                    <div class="card-body">
-                                        <h5 class="card-title"><a href="{{route('articles.slug', ['slug' => $article->slug])}}">{{$article->title}} </a></h5>
-                                        <p class="card-text"><small class="text-muted">By: {{$article->user->name }}</small></p>
-                                        <p class="card-text"><small class="text-muted">Created: {{$article->created_at->diffForHumans() }}</small></p>
-                                        <p class="card-text"><small class="text-muted">Last updated {{$article->updated_at->diffForHumans() }}</small></p>
-                    
-                                    </div>
-                                    </div>
-                                </div>
-                                @endforeach
-                                </div>
-                                @endif
-                            </div>
-                            <div class="card-footer">
-                                {{ $articles }}
+                            {!!$article->html_content!!}
                             </div>
                         </div>
                         </div>

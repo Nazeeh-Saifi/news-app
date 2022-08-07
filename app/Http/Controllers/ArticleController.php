@@ -16,7 +16,7 @@ class ArticleController extends Controller
     public function index()
     {
         //
-        $articles = Article::latest()->paginate(6);
+        $articles = Article::with('user')->where('user_id', auth()->id())->latest()->paginate(9);
         return view('articles.index', ['articles' => $articles]);
     }
 
