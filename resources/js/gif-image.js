@@ -1,5 +1,3 @@
-import axios from "axios";
-
 export class GifImage {
     static get toolbox() {
         return {
@@ -11,8 +9,9 @@ export class GifImage {
         this.data = data;
         this.wrapper = undefined;
         this.loadingSpinner = undefined;
+        this.modalElem = undefined;
         this.rating = "g";
-        this.limit = 6;
+        this.limit = 9;
         this.offset = 0;
         this.lang = "en";
         this.q = "";
@@ -35,16 +34,28 @@ export class GifImage {
                 : `${this.gifApiEndpoint}/search?key=${this.apiKey}&q=${this.q}&limit=${this.limit}`;
 
         console.log({
+            git: this.constructor,
+            data: this.data,
             provider: this.provider,
             key: this.apiKey,
             trending: this.trendingEndpoint,
             searchEndpoint: this.searchEndpoint,
+            paste: this.constructor.pasteConfig,
         });
     }
 
     render() {
+        console.log("rendering");
         this.wrapper = document.createElement("div");
-        this.wrapper.classList.add(
+        this.modalElem = document.getElementById("myModal");
+        this.modalBs = new bootstrap.Modal(this.modalElem);
+
+        const modalTitle = this.modalElem.querySelector(".modal-title");
+        modalTitle.innerText = "Please choose a gif";
+        const modalBody = this.modalElem.querySelector(".modal-body");
+
+        const gifSelector = document.createElement("div");
+        gifSelector.classList.add(
             "gif-selector",
             "d-flex",
             "flex-column",
@@ -69,8 +80,12 @@ export class GifImage {
             return this.wrapper;
         }
 
-        this.wrapper.appendChild(input);
-        this.wrapper.appendChild(this.loadingSpinner);
+        gifSelector.appendChild(input);
+        gifSelector.appendChild(this.loadingSpinner);
+        modalBody.appendChild(gifSelector);
+
+        // show the modal
+        this.modalBs.show();
 
         // fetching trending gifs when render is running for the first time
         this._fetchAndCreateImages(this._getTrendingData.bind(this));
@@ -80,7 +95,7 @@ export class GifImage {
             "keyup",
             _.debounce(async (event) => {
                 // removing old results
-                this.wrapper.querySelector(".gifs-wrapper").remove();
+                this.modalElem.querySelector(".gifs-wrapper").remove();
                 // making the spinner visible
                 this.loadingSpinner.toggleAttribute("hidden");
 
@@ -179,30 +194,40 @@ export class GifImage {
 
     //used when pressing an image and when there is old data and validation failed
     _selectImage(url) {
+        console.log("_selectImage", url);
         const image = document.createElement("img");
         image.classList.add("my-3");
         image.src = url;
 
         this.wrapper.innerHTML = "";
-        this.wrapper.classList.toggle("border");
         this.wrapper.appendChild(image);
+        this.modalBs.hide();
     }
 
     // use array of urls to create gifs grid to choose from
     _createImages(urls) {
         const row = document.createElement("div");
-        row.classList.add("gifs-wrapper", "row", "g-2");
+        row.classList.add("gifs-wrapper","row");
+        // row.classList.add("row", "g-2");
 
-        urls.forEach((url) => {
+        const colsArray = [];
+        for (let i = 0; i < 3; i++) {
             const col = document.createElement("div");
             col.classList.add("col-sm-4");
+            colsArray.push(col);
+        }
 
-            const card = document.createElement("div");
-            card.classList.add("card");
+        urls.forEach((url, index) => {
+       
 
             const image = document.createElement("img");
-            image.classList.add("card-img");
+            image.classList.add("w-100","mb-4");
             image.src = url;
+            image.toggleAttribute("hidden");
+
+            const placeholder = document.createElement("img");
+            placeholder.classList.add("w-100","mb-4");
+            placeholder.src = "/images/loader.svg";
 
             image.addEventListener(
                 "click",
@@ -210,17 +235,30 @@ export class GifImage {
                     this._selectImage(event.target.src);
                 }.bind(this)
             );
-            card.appendChild(image);
-            col.appendChild(card);
+
+            image.addEventListener(
+                "load",
+                function (event) {
+                    placeholder.toggleAttribute("hidden");
+                    image.toggleAttribute("hidden");
+                }.bind(this)
+            );
+
+            let choosenColumn = colsArray[Math.floor(index / colsArray.length)];
+            choosenColumn.appendChild(placeholder);
+            choosenColumn.appendChild(image);
+        });
+        colsArray.forEach((col) => {
             row.appendChild(col);
         });
-        this.wrapper.appendChild(row);
+
+        this.modalElem.querySelector(".gif-selector").appendChild(row);
     }
 
     save(blockContent) {
         const img = blockContent.querySelector("img");
         return {
-            url: img.src,
+            url: img ? img.src : "",
         };
     }
 
@@ -230,4 +268,22 @@ export class GifImage {
         }
         return true;
     }
+
+    // onPaste(event) {
+    //     console.log(event);
+    //     switch (event.type) {
+    //         // ... case 'tag'
+    //         // ... case 'file'
+    //         case "pattern":
+    //             const src = event.detail.data;
+
+    //             const image = document.createElement("img");
+    //             image.classList.add("my-3");
+    //             image.src = src;
+
+    //             this.wrapper.innerHTML = "";
+    //             this.wrapper.appendChild(image);
+    //             break;
+    //     }
+    // }
 }

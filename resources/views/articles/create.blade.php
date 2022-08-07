@@ -45,6 +45,23 @@
     </div>
   </div>
 </div>
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+      </div>
+      {{-- <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">insert</button>
+      </div> --}}
+    </div>
+  </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -90,7 +107,7 @@ window.addEventListener('load', function() {
     data: oldData?.blocks.length > 0 ? oldData : {}
   });
 
-  //
+  // this add a hidden input to store the data of the editor in and submit it to backend
   $('#article-store').submit(function(e) {
 
     editorJs.save().then((outputData) => {
@@ -107,6 +124,14 @@ window.addEventListener('load', function() {
     });
   });
 
-});
+
+  // attaching event listener that will remove the images from modal when hiding it
+  const modal = document.getElementById("myModal");
+  modal.addEventListener("hidden.bs.modal", function (event) {
+      // console.log(event);
+      this.querySelector(".gif-selector")?.remove();
+  });
+
+  });
 </script>
 @endpush
