@@ -5,11 +5,20 @@ export class GifImage {
             icon: '<svg width="17" height="15" viewBox="0 0 336 276" xmlns="http://www.w3.org/2000/svg"><path d="M291 150V79c0-19-15-34-34-34H79c-19 0-34 15-34 34v42l67-44 81 72 56-29 42 30zm0 52l-43-30-56 30-81-67-66 39v23c0 19 15 34 34 34h178c17 0 31-13 34-29zM79 0h178c44 0 79 35 79 79v118c0 44-35 79-79 79H79c-44 0-79-35-79-79V79C0 35 35 0 79 0z"/></svg>',
         };
     }
+    static get pasteConfig() {
+        return {
+            // ... tags
+            // ... files
+            patterns: {
+                image: /https?:\/\/\S+\.(gif)$/i,
+            },
+        };
+    }
     constructor({ data }) {
         this.data = data;
         this.wrapper = undefined;
         this.loadingSpinner = undefined;
-        this.modalElem = undefined;
+        this.modalElem = document.getElementById("myModal");
         this.rating = "g";
         this.limit = 9;
         this.offset = 0;
@@ -33,6 +42,8 @@ export class GifImage {
                 ? `${this.gifApiEndpoint}/search?api_key=${this.apiKey}&q=${this.q}&offset=${this.offset}&limit=${this.limit}&rating=${this.rating}`
                 : `${this.gifApiEndpoint}/search?key=${this.apiKey}&q=${this.q}&limit=${this.limit}`;
 
+        this.modalBs = new bootstrap.Modal(this.modalElem);
+
         console.log({
             git: this.constructor,
             data: this.data,
@@ -47,8 +58,13 @@ export class GifImage {
     render() {
         console.log("rendering");
         this.wrapper = document.createElement("div");
-        this.modalElem = document.getElementById("myModal");
-        this.modalBs = new bootstrap.Modal(this.modalElem);
+
+        // if there is old data
+        // (when having block that contain gif and leaving title empty and pressing add new article)
+        if (this.data && this.data.url) {
+            this._selectImage(this.data.url);
+            return this.wrapper;
+        }
 
         const modalTitle = this.modalElem.querySelector(".modal-title");
         modalTitle.innerText = "Please choose a gif";
@@ -72,13 +88,6 @@ export class GifImage {
         // add div element for the loading spinner when request is fetching
         this.loadingSpinner = document.createElement("div");
         this.loadingSpinner.classList.add("lds-hourglass");
-
-        // if there is old data
-        // (when having block that contain gif and leaving title empty and pressing add new article)
-        if (this.data && this.data.url) {
-            this._selectImage(this.data.url);
-            return this.wrapper;
-        }
 
         gifSelector.appendChild(input);
         gifSelector.appendChild(this.loadingSpinner);
@@ -207,7 +216,7 @@ export class GifImage {
     // use array of urls to create gifs grid to choose from
     _createImages(urls) {
         const row = document.createElement("div");
-        row.classList.add("gifs-wrapper","row");
+        row.classList.add("gifs-wrapper", "row");
         // row.classList.add("row", "g-2");
 
         const colsArray = [];
@@ -218,15 +227,13 @@ export class GifImage {
         }
 
         urls.forEach((url, index) => {
-       
-
             const image = document.createElement("img");
-            image.classList.add("w-100","mb-4");
+            image.classList.add("w-100", "mb-4");
             image.src = url;
             image.toggleAttribute("hidden");
 
             const placeholder = document.createElement("img");
-            placeholder.classList.add("w-100","mb-4");
+            placeholder.classList.add("w-100", "mb-4");
             placeholder.src = "/images/loader.svg";
 
             image.addEventListener(
@@ -269,21 +276,33 @@ export class GifImage {
         return true;
     }
 
-    // onPaste(event) {
-    //     console.log(event);
-    //     switch (event.type) {
-    //         // ... case 'tag'
-    //         // ... case 'file'
-    //         case "pattern":
-    //             const src = event.detail.data;
+    onPaste(event) {
+        // console.log(this,event);
+        // console.log(
+        //     this.modalElem,
+        //     this.modalBs,
+        //     this.modalBs.isShown,
+        //     this.modalBs.isTransitioning
+        // );
+        this.modalElem.addEventListener("shown.bs.modal", function () {
+            // console.log("shown", this, this.modalElem);
+            this.modalBs.hide();
+        }.bind(this), { once: true });
+        switch (event.type) {
+            // ... case 'tag'
+            // ... case 'file'
+            case "pattern":
+                const src = event.detail.data;
 
-    //             const image = document.createElement("img");
-    //             image.classList.add("my-3");
-    //             image.src = src;
+                const image = document.createElement("img");
+                image.classList.add("my-3");
+                image.src = src;
 
-    //             this.wrapper.innerHTML = "";
-    //             this.wrapper.appendChild(image);
-    //             break;
-    //     }
-    // }
+                this.wrapper.innerHTML = "";
+                this.wrapper.appendChild(image);
+                console.log("in", this.modalBs);
+                this.modalBs.hide();
+                break;
+        }
+    }
 }
