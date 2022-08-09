@@ -7,8 +7,6 @@ export class GifImage {
     }
     static get pasteConfig() {
         return {
-            // ... tags
-            // ... files
             patterns: {
                 image: /https?:\/\/\S+\.(gif)$/i,
             },
@@ -73,24 +71,64 @@ export class GifImage {
         const gifSelector = document.createElement("div");
         gifSelector.classList.add(
             "gif-selector",
-            "d-flex",
-            "flex-column",
-            "align-items-center",
+            "container",
+            // "d-flex",
+            // "flex-column",
+            // "align-items-center",
             "border"
         );
 
+        const inputWrapper = document.createElement("div");
+        inputWrapper.classList.add("row", "my-3");
+
+        const col1 = document.createElement("div");
+        col1.classList.add("col-10");
+
         // add input element for searching with classes for styling
         const input = document.createElement("input");
-        input.classList.add("form-control", "w-50", "my-3");
+        input.classList.add("form-control");
+        // input.classList.add("w-50", "my-3");
         input.placeholder =
             this.provider === "giphy" ? "Search via giphy" : "Search via tenor";
 
+        const col2 = document.createElement("div");
+        col2.classList.add("col-sm-2");
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.classList.add("btn", "btn-primary");
+        button.innerText = "insert";
+
+        button.addEventListener(
+            "click",
+            function () {
+                if (window.selectedImagesUrls.length > 0) {
+                    window.selectedImagesUrls.forEach((url) => {
+                        window.editorJs.blocks.insert("image", { url });
+                        window.selectedImagesUrls = [];
+                        this.modalBs.hide();
+                    });
+                }
+            }.bind(this)
+        );
+
+        const loadingSpinnerWrapper = document.createElement("div");
+        loadingSpinnerWrapper.classList.add(
+            "row",
+            "my-3",
+            "justify-content-center"
+        );
         // add div element for the loading spinner when request is fetching
         this.loadingSpinner = document.createElement("div");
         this.loadingSpinner.classList.add("lds-hourglass");
 
-        gifSelector.appendChild(input);
-        gifSelector.appendChild(this.loadingSpinner);
+        col2.appendChild(button);
+        col1.appendChild(input);
+        inputWrapper.appendChild(col1);
+        inputWrapper.appendChild(col2);
+        loadingSpinnerWrapper.appendChild(this.loadingSpinner);
+        gifSelector.appendChild(inputWrapper);
+        gifSelector.appendChild(loadingSpinnerWrapper);
         modalBody.appendChild(gifSelector);
 
         // show the modal
@@ -227,19 +265,49 @@ export class GifImage {
         }
 
         urls.forEach((url, index) => {
+            const imageWrapper = document.createElement("div");
+            imageWrapper.classList.add(
+                "d-flex",
+                "justify-content-center",
+                "align-items-center",
+                "position-relative"
+            );
+
             const image = document.createElement("img");
             image.classList.add("w-100", "mb-4");
             image.src = url;
             image.toggleAttribute("hidden");
+            image.style.zIndex = "1";
 
             const placeholder = document.createElement("img");
             placeholder.classList.add("w-100", "mb-4");
             placeholder.src = "/images/loader.svg";
 
+            const selectOverlay = document.createElement("img");
+            selectOverlay.classList.add("w-25", "mb-4", "position-absolute");
+            selectOverlay.toggleAttribute("hidden");
+            selectOverlay.src = "/images/checkmark.svg";
+
             image.addEventListener(
                 "click",
                 function (event) {
-                    this._selectImage(event.target.src);
+                    console.log(image.style.opacity);
+                    if (image.style.opacity === "0.2") {
+                        image.style.opacity = "1";
+                        selectOverlay.toggleAttribute("hidden");
+                        let index = window.selectedImagesUrls.indexOf(
+                            event.target.src
+                        );
+                        if (index >= 0) {
+                            window.selectedImagesUrls.splice(index, 1);
+                        }
+                    } else {
+                        image.style.opacity = "0.2";
+                        selectOverlay.toggleAttribute("hidden");
+                        window.selectedImagesUrls.push(event.target.src);
+                    }
+
+                    // this._selectImage(event.target.src);
                 }.bind(this)
             );
 
@@ -252,8 +320,10 @@ export class GifImage {
             );
 
             let choosenColumn = colsArray[Math.floor(index / colsArray.length)];
-            choosenColumn.appendChild(placeholder);
-            choosenColumn.appendChild(image);
+            imageWrapper.appendChild(placeholder);
+            imageWrapper.appendChild(selectOverlay);
+            imageWrapper.appendChild(image);
+            choosenColumn.appendChild(imageWrapper);
         });
         colsArray.forEach((col) => {
             row.appendChild(col);
@@ -284,10 +354,14 @@ export class GifImage {
         //     this.modalBs.isShown,
         //     this.modalBs.isTransitioning
         // );
-        this.modalElem.addEventListener("shown.bs.modal", function () {
-            // console.log("shown", this, this.modalElem);
-            this.modalBs.hide();
-        }.bind(this), { once: true });
+        this.modalElem.addEventListener(
+            "shown.bs.modal",
+            function () {
+                // console.log("shown", this, this.modalElem);
+                this.modalBs.hide();
+            }.bind(this),
+            { once: true }
+        );
         switch (event.type) {
             // ... case 'tag'
             // ... case 'file'

@@ -83,6 +83,7 @@ window.addEventListener('load', function() {
     console.error('json parsing error');
   }
 
+  window.selectedImagesUrls =[];
   window.editorJs = new EditorJS({
     /**
      * Id of Element that should contain the Editor
@@ -107,6 +108,7 @@ window.addEventListener('load', function() {
     data: oldData?.blocks.length > 0 ? oldData : {}
   });
 
+  console.log(oldData);
   // this add a hidden input to store the data of the editor in and submit it to backend
   $('#article-store').submit(function(e) {
 
@@ -130,6 +132,7 @@ window.addEventListener('load', function() {
   modal.addEventListener("hidden.bs.modal", function (event) {
       // console.log(event);
       this.querySelector(".gif-selector")?.remove();
+      window.selectedImagesUrls =[] ;
   });
 
   });
