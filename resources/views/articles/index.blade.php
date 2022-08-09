@@ -24,6 +24,15 @@
           </div>
           @endif
           {{-- articles cards --}}
+          @if(count($articles) == 0 )
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-check2" viewBox="0 0 16 16">
+              <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/>
+              </svg>
+              {{__('Please register then create an article!!')}}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          @else
           <div class="row g-2">
             @foreach ($articles as $article)
             <div class="col-sm-4">
@@ -40,6 +49,8 @@
             </div>
             @endforeach
           </div>
+          @endif
+
       </div>
       <div class="card-footer">
         {{ $articles }}
