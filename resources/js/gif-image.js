@@ -1,3 +1,4 @@
+import { createEl } from "./editorJsUtils";
 export class GifImage {
     static get toolbox() {
         return {
@@ -17,6 +18,11 @@ export class GifImage {
         this.wrapper = undefined;
         this.loadingSpinner = undefined;
         this.modalElem = document.getElementById("myModal");
+        this.modalBs = new bootstrap.Modal(this.modalElem);
+
+        /**
+         * GIF endpoints related variables
+         */
         this.rating = "g";
         this.limit = 9;
         this.offset = 0;
@@ -39,23 +45,10 @@ export class GifImage {
             this.provider === "giphy"
                 ? `${this.gifApiEndpoint}/search?api_key=${this.apiKey}&q=${this.q}&offset=${this.offset}&limit=${this.limit}&rating=${this.rating}`
                 : `${this.gifApiEndpoint}/search?key=${this.apiKey}&q=${this.q}&limit=${this.limit}`;
-
-        this.modalBs = new bootstrap.Modal(this.modalElem);
-
-        console.log({
-            git: this.constructor,
-            data: this.data,
-            provider: this.provider,
-            key: this.apiKey,
-            trending: this.trendingEndpoint,
-            searchEndpoint: this.searchEndpoint,
-            paste: this.constructor.pasteConfig,
-        });
     }
 
     render() {
-        console.log("rendering");
-        this.wrapper = document.createElement("div");
+        this.wrapper = createEl("div");
 
         // if there is old data
         // (when having block that contain gif and leaving title empty and pressing add new article)
@@ -68,43 +61,48 @@ export class GifImage {
         modalTitle.innerText = "Please choose a gif";
         const modalBody = this.modalElem.querySelector(".modal-body");
 
-        const gifSelector = document.createElement("div");
-        gifSelector.classList.add(
-            "gif-selector",
-            "container",
-            // "d-flex",
-            // "flex-column",
-            // "align-items-center",
-            "border"
-        );
+        const gifSelector = createEl("div", {
+            classList: ["gif-selector", "container", "border"],
+        });
 
-        const inputWrapper = document.createElement("div");
-        inputWrapper.classList.add("row", "my-3");
+        const inputWrapper = createEl("div", {
+            classList: ["row", "my-3"],
+        });
 
-        const col1 = document.createElement("div");
-        col1.classList.add("col-10");
+        const col1 = createEl("div", {
+            classList: ["col-10"],
+        });
 
         // add input element for searching with classes for styling
-        const input = document.createElement("input");
-        input.classList.add("form-control");
-        // input.classList.add("w-50", "my-3");
-        input.placeholder =
-            this.provider === "giphy" ? "Search via giphy" : "Search via tenor";
+        const input = createEl("input", {
+            classList: ["form-control"],
+            placeholder:
+                this.provider === "giphy"
+                    ? "Search via giphy"
+                    : "Search via tenor",
+        });
 
-        const col2 = document.createElement("div");
-        col2.classList.add("col-sm-2");
+        const col2 = createEl("div", {
+            classList: ["col-sm-2"],
+        });
 
-        const button = document.createElement("button");
-        button.type = "button";
-        button.classList.add("btn", "btn-primary");
-        button.innerText = "insert";
+        const button = createEl("button", {
+            type: "button",
+            classList: ["btn", "btn-primary"],
+            innerText: "insert",
+        });
 
+        /**
+         * when clicking the insert button all the urls in window.selectedImagesUrls
+         * will be created as blocks using the core block api (window.editorJs.blocks)
+         */
         button.addEventListener(
             "click",
             function () {
                 if (window.selectedImagesUrls.length > 0) {
                     window.selectedImagesUrls.forEach((url) => {
                         window.editorJs.blocks.insert("image", { url });
+                        window.editorJs.caret.setToLastBlock()
                         window.selectedImagesUrls = [];
                         this.modalBs.hide();
                     });
@@ -112,15 +110,14 @@ export class GifImage {
             }.bind(this)
         );
 
-        const loadingSpinnerWrapper = document.createElement("div");
-        loadingSpinnerWrapper.classList.add(
-            "row",
-            "my-3",
-            "justify-content-center"
-        );
+        const loadingSpinnerWrapper = createEl("div", {
+            classList: ["row", "my-3", "justify-content-center"],
+        });
+
         // add div element for the loading spinner when request is fetching
-        this.loadingSpinner = document.createElement("div");
-        this.loadingSpinner.classList.add("lds-hourglass");
+        this.loadingSpinner = createEl("div", {
+            classList: ["lds-hourglass"],
+        });
 
         col2.appendChild(button);
         col1.appendChild(input);
@@ -135,7 +132,10 @@ export class GifImage {
         this.modalBs.show();
 
         // fetching trending gifs when render is running for the first time
-        this._fetchAndCreateImages(this._getTrendingData.bind(this));
+        this._fetchAndCreateImages(
+            this._getData.bind(this),
+            this.trendingEndpoint
+        );
 
         // when user search listener
         input.addEventListener(
@@ -150,12 +150,15 @@ export class GifImage {
                 this.q = event.target.value;
                 this._updateSearchEndpoint();
 
-                console.log(this.q);
                 // render trending when no q value
                 this.q
-                    ? this._fetchAndCreateImages(this._getSearchData.bind(this))
+                    ? this._fetchAndCreateImages(
+                          this._getData.bind(this),
+                          this.searchEndpoint
+                      )
                     : this._fetchAndCreateImages(
-                          this._getTrendingData.bind(this)
+                          this._getData.bind(this),
+                          this.trendingEndpoint
                       );
             }, 500)
         );
@@ -163,7 +166,7 @@ export class GifImage {
         return this.wrapper;
     }
 
-    // when q change
+    // when q change endpoint need to be updated
     _updateSearchEndpoint() {
         this.searchEndpoint =
             this.provider === "giphy"
@@ -172,10 +175,9 @@ export class GifImage {
     }
 
     // use one of the fetch functions (tranding or search) and create thier
-    _fetchAndCreateImages(fetchFunction) {
-        fetchFunction()
+    _fetchAndCreateImages(fetchFunction, url) {
+        fetchFunction(url)
             .then((data) => {
-                console.log(data);
                 let providerData =
                     this.provider === "giphy" ? data.data : data.results;
                 const urls = providerData.reduce((acc, obj) => {
@@ -194,54 +196,17 @@ export class GifImage {
             });
     }
 
-    async _getTrendingData() {
+    async _getData(url) {
         try {
-            let res = await fetch(this.trendingEndpoint);
+            let res = await fetch(url);
             return res.json();
         } catch (error) {
             console.error(error);
         }
     }
 
-    async _getSearchData() {
-        try {
-            let res = await fetch(this.searchEndpoint);
-            return res.json();
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
-    //not used anymore
-    _wrapWithRowCol(element, colWidth) {
-        const row = document.createElement("div");
-        row.classList.add("row");
-
-        const col = document.createElement("div");
-        col.classList.add(colWidth ? "col-" + colWidth : "col");
-
-        col.appendChild(element);
-        row.appendChild(col);
-        return row;
-    }
-
-    //not used anymore
-    _createImage(url, captionText) {
-        const image = document.createElement("img");
-        const caption = document.createElement("div");
-
-        image.src = url;
-        caption.contentEditable = true;
-        caption.innerHTML = captionText || "";
-
-        this.wrapper.innerHTML = "";
-        this.wrapper.appendChild(image);
-        this.wrapper.appendChild(caption);
-    }
-
-    //used when pressing an image and when there is old data and validation failed
+    //used when there is old data and validation failed
     _selectImage(url) {
-        console.log("_selectImage", url);
         const image = document.createElement("img");
         image.classList.add("my-3");
         image.src = url;
@@ -253,45 +218,56 @@ export class GifImage {
 
     // use array of urls to create gifs grid to choose from
     _createImages(urls) {
-        const row = document.createElement("div");
-        row.classList.add("gifs-wrapper", "row");
-        // row.classList.add("row", "g-2");
+        const row = createEl("div", {
+            classList: ["gifs-wrapper", "row"],
+        });
 
         const colsArray = [];
         for (let i = 0; i < 3; i++) {
-            const col = document.createElement("div");
-            col.classList.add("col-sm-4");
+            const col = createEl("div", {
+                classList: ["col-sm-4"],
+            });
             colsArray.push(col);
         }
 
         urls.forEach((url, index) => {
-            const imageWrapper = document.createElement("div");
-            imageWrapper.classList.add(
-                "d-flex",
-                "justify-content-center",
-                "align-items-center",
-                "position-relative"
-            );
+            const imageWrapper = createEl("div", {
+                classList: [
+                    "d-flex",
+                    "justify-content-center",
+                    "align-items-center",
+                    "position-relative",
+                ],
+            });
 
-            const image = document.createElement("img");
-            image.classList.add("w-100", "mb-4");
-            image.src = url;
+            // the gif images
+            const image = createEl("img", {
+                classList: ["w-100", "mb-4"],
+                src: url,
+            });
             image.toggleAttribute("hidden");
             image.style.zIndex = "1";
 
-            const placeholder = document.createElement("img");
-            placeholder.classList.add("w-100", "mb-4");
-            placeholder.src = "/images/loader.svg";
+            // the loader shown while images loading
+            const placeholder = createEl("img", {
+                classList: ["w-100", "mb-4"],
+                src: "/images/loader.svg",
+            });
 
-            const selectOverlay = document.createElement("img");
-            selectOverlay.classList.add("w-25", "mb-4", "position-absolute");
+            // the checkmark on top of images
+            const selectOverlay = createEl("img", {
+                classList: ["w-25", "mb-4", "position-absolute"],
+                src: "/images/checkmark.svg",
+            });
             selectOverlay.toggleAttribute("hidden");
-            selectOverlay.src = "/images/checkmark.svg";
 
+            /**
+             * when clicking the image dim the image and view the
+             * checkmark and add the url of the image to window.selectedImagesUls
+             */
             image.addEventListener(
                 "click",
                 function (event) {
-                    console.log(image.style.opacity);
                     if (image.style.opacity === "0.2") {
                         image.style.opacity = "1";
                         selectOverlay.toggleAttribute("hidden");
@@ -306,18 +282,14 @@ export class GifImage {
                         selectOverlay.toggleAttribute("hidden");
                         window.selectedImagesUrls.push(event.target.src);
                     }
-
-                    // this._selectImage(event.target.src);
                 }.bind(this)
             );
 
-            image.addEventListener(
-                "load",
-                function (event) {
-                    placeholder.toggleAttribute("hidden");
-                    image.toggleAttribute("hidden");
-                }.bind(this)
-            );
+            // viewing the placeholder while the images finish loading
+            image.addEventListener("load", function (event) {
+                placeholder.toggleAttribute("hidden");
+                image.toggleAttribute("hidden");
+            });
 
             let choosenColumn = colsArray[Math.floor(index / colsArray.length)];
             imageWrapper.appendChild(placeholder);
@@ -346,25 +318,22 @@ export class GifImage {
         return true;
     }
 
+    /**
+     *
+     * on paste the render function is called
+     * that will make the modal appear
+     * so i added an event listener once to close it
+     * and after that creating an image using the pasted url
+     */
     onPaste(event) {
-        // console.log(this,event);
-        // console.log(
-        //     this.modalElem,
-        //     this.modalBs,
-        //     this.modalBs.isShown,
-        //     this.modalBs.isTransitioning
-        // );
         this.modalElem.addEventListener(
             "shown.bs.modal",
             function () {
-                // console.log("shown", this, this.modalElem);
                 this.modalBs.hide();
             }.bind(this),
             { once: true }
         );
         switch (event.type) {
-            // ... case 'tag'
-            // ... case 'file'
             case "pattern":
                 const src = event.detail.data;
 
@@ -374,8 +343,6 @@ export class GifImage {
 
                 this.wrapper.innerHTML = "";
                 this.wrapper.appendChild(image);
-                console.log("in", this.modalBs);
-                this.modalBs.hide();
                 break;
         }
     }
