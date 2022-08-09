@@ -22,7 +22,7 @@ Route::get('/', function () {
 })->name('welcome');
 
 Route::get('/articles/{slug}', function ($slug) {
-    $article = Article::where('slug', $slug)->first();
+    $article = Article::where('slug', $slug)->firstOrFail();
     // dd($slug, request(), $article);
     return view('article-slug', ['article' => $article]);
 })->name('articles.slug');
