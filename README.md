@@ -30,3 +30,23 @@ After downloading the zip file and extracting it open cmd and navigate to projec
 8. php artisan serve
 
 ## Everything should be up and running ... Enjoy!
+
+### website map
+
+-   public routes:
+
+    -   / -------------------------------------> public articles (latest articles can be created by multiple users) (public route)
+
+    -   /articles/{slug} -----------------> show the articles by slug (public route)
+
+-   need authentication routes:
+
+    -   /admin/articles -----------------> user specific articles (my articles) (only of auth users)
+
+    -   /admin/articles/{id} ----------> show articles page (only of auth users)
+
+    -   /admin/articles/create -------> create articles (only of auth users)
+
+-   after creating articles you will be redirected to /admin/articles (my articles)
+
+-   (when logged in) you can go to public articles by pressing the logo in the header
